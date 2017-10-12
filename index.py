@@ -19,10 +19,10 @@ class StdOutListener(StreamListener):
                 image_data = urllib.urlopen(media['media_url_https']).read()
 
                 headers = {'X-Callback-Url': 'http://gateway:8080/async-function/tweetpic'}
-                json_data = {
+                json_data = json.dumps({
                     "image": image_data,
                     "status_id": tweet['id_str']
-                }
+                })
                 r = requests.post('http://gateway:8080/async-function/colorization', data=json_data, headers=headers)
                 if (r.status_code == requests.codes.ok):
                     image_url = r.text.strip()
