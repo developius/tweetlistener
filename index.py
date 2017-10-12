@@ -22,8 +22,8 @@ class TweetListener(StreamListener):
                     "status_id": tweet['id_str']
                 })
                 r = requests.post('http://gateway:8080/async-function/colorization', data=json_data, headers=headers)
-                if (r.status_code == requests.codes.ok):
-                    print("Colorization succeeded for " + image_url)
+                if (r.status_code == requests.codes.accepted):
+                    print("Colorization succeeded for -> " + media['media_url_https'])
                 else:
                     print("Colorization failed for -> " + media['media_url_https'])
 
