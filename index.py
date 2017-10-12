@@ -6,6 +6,11 @@ from tweepy import Stream
 auth = OAuthHandler(os.environ['consumer_key'], os.environ['consumer_secret'])
 auth.set_access_token(os.environ['access_token'], os.environ['access_token_secret'])
 
+minioClient = Minio(os.environ['minio_hostname'],
+                  access_key=os.environ['minio_access_key'],
+                  secret_key=os.environ['minio_secret_key'],
+                  secure=False)
+
 class TweetListener(StreamListener):
     def on_data(self, data):
         tweet = json.loads(data)
@@ -16,9 +21,19 @@ class TweetListener(StreamListener):
                 print("Ooooo a photo")
                 image_data = urllib.urlopen(media['media_url_https']).read()
 
+                now = str(int(round(time.time() * 1000)))
+                filename_in = now + '.jpg'
+                file_path_in = tempfile.gettempdir() + '/' + filename_in
+
+                with open(file_path_in, 'wb') as f:
+                    f.write(image_data)
+
+                with nostdout():
+                    minioClient.fput_object('colorization', filename_in, file_path_in)
+
                 headers = {'X-Callback-Url': 'http://gateway:8080/async-function/tweetpic'}
                 json_data = json.dumps({
-                    "image": image_data,
+                    "image": filename_in,
                     "status_id": tweet['id_str']
                 })
                 r = requests.post('http://gateway:8080/async-function/colorization', data=json_data, headers=headers)
