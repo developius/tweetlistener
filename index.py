@@ -42,11 +42,11 @@ class TweetListener(StreamListener):
                     minioClient.fput_object('colorization', filename_in, file_path_in)
 
                 headers = {'X-Callback-Url': 'http://gateway:8080/async-function/tweetpic'}
-                json_data = json.dumps({
+                json_data = {
                     "image": filename_in,
                     "status_id": tweet['id_str']
-                })
-                r = requests.post('http://gateway:8080/async-function/colorization', data=json_data, headers=headers)
+                }
+                r = requests.post('http://gateway:8080/async-function/colorization', json=json_data, headers=headers)
                 if (r.status_code == requests.codes.accepted):
                     print("Colorization succeeded for -> " + media['media_url_https'])
                 else:
