@@ -1,7 +1,17 @@
-import os, json, time, tempfile, sys, io, urllib, requests
+import os, json, time, tempfile, sys, io, urllib, requests, contextlib
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
+
+from minio import Minio
+from minio.error import ResponseError
+
+@contextlib.contextmanager
+def nostdout():
+    save_stdout = sys.stdout
+    sys.stdout = io.BytesIO()
+    yield
+    sys.stdout = save_stdout
 
 auth = OAuthHandler(os.environ['consumer_key'], os.environ['consumer_secret'])
 auth.set_access_token(os.environ['access_token'], os.environ['access_token_secret'])
