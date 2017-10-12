@@ -8,11 +8,9 @@ auth.set_access_token(os.environ['access_token'], os.environ['access_token_secre
 
 class TweetListener(StreamListener):
     def on_data(self, data):
-        print('Got tweet')
         tweet = json.loads(data)
-        print(tweet)
+        print('Got tweet from %s "%s" (%i followers)' % (tweet['user']['screen_name'], tweet['text'], tweet['user']['followers_count']))
         if (tweet['entities'] and tweet['entities']['media']):
-            print(tweet['entities']['media'])
             media = tweet['entities']['media'][0]
             if (media['type'] == 'photo'):
                 print("Ooooo a photo")
@@ -23,7 +21,7 @@ class TweetListener(StreamListener):
                     "image": image_data,
                     "status_id": tweet['id_str']
                 })
-                requests.post('http://gateway:8080/async-function/colorization', data=json_data, headers=headers)
+                r = requests.post('http://gateway:8080/async-function/colorization', data=json_data, headers=headers)
                 if (r.status_code == requests.codes.ok):
                     print("Colorization succeeded for " + image_url)
                 else:
