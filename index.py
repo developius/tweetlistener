@@ -18,18 +18,15 @@ class StdOutListener(StreamListener):
                 print("Ooooo a photo")
                 image_data = urllib.urlopen(media['media_url_https']).read()
 
-                r = requests.post(os.environ['colorization_url'], data=image_data)
+                headers = {'X-Callback-Url': 'http://gateway/async-function/tweetpic'}
+                json_data = {
+                    "image": image_data,
+                    "status_id": tweet['id_str']
+                }
+                r = requests.post('http://gateway/async-function/colorization', data=json_data, headers=headers)
                 if (r.status_code == requests.codes.ok):
                     image_url = r.text.strip()
                     print("Colorization succeeded for " + image_url)
-                    r = requests.post(os.environ['tweetpic_url'], data=json.dumps({
-                        "status_id": tweet['id_str'],
-                        "image": image_url
-                    }))
-                    if (r.status_code == requests.codes.ok):
-                        print('Successfully replied to %s with image %s' % (tweet['user']['screen_name'], image_url))
-                    else:
-                        print("Tweetback failed for image %s (%s)" % (image_url, r.text))
                 else:
                     print("Colorization failed for -> " + media['media_url_https'])
 
