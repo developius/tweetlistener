@@ -6,7 +6,7 @@ from tweepy import Stream
 auth = OAuthHandler(os.environ['consumer_key'], os.environ['consumer_secret'])
 auth.set_access_token(os.environ['access_token'], os.environ['access_token_secret'])
 
-class StdOutListener(StreamListener):
+class TweetListener(StreamListener):
     def on_data(self, data):
         print('Got tweet')
         tweet = json.loads(data)
@@ -23,9 +23,8 @@ class StdOutListener(StreamListener):
                     "image": image_data,
                     "status_id": tweet['id_str']
                 })
-                r = requests.post('http://gateway:8080/async-function/colorization', data=json_data, headers=headers)
+                requests.post('http://gateway:8080/async-function/colorization', data=json_data, headers=headers)
                 if (r.status_code == requests.codes.ok):
-                    image_url = r.text.strip()
                     print("Colorization succeeded for " + image_url)
                 else:
                     print("Colorization failed for -> " + media['media_url_https'])
@@ -35,7 +34,7 @@ class StdOutListener(StreamListener):
 
 if __name__ == '__main__':
     print('Setting up')
-    l = StdOutListener()
+    l = TweetListener()
     stream = Stream(auth, l)
 
     print('Listening for tweets')
