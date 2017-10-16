@@ -27,33 +27,34 @@ class TweetListener(StreamListener):
         print('Got tweet from %s "%s" (%i followers)' % (tweet['user']['screen_name'], tweet['text'], tweet['user']['followers_count']))
         if not tweet['retweeted']:
             if (tweet['entities'] and tweet['entities']['media']):
-                media = tweet['entities']['media'][0]
-                if (media['type'] == 'photo'):
-                    print("Ooooo a photo")
-                    image_data = urllib.urlopen(media['media_url_https']).read()
+                print('Got %i media items' % len(tweet['entities']['media']))
+                for media in tweet['entities']['media']:
+                    if (media['type'] == 'photo'):
+                        print("Ooooo a photo")
+                        image_data = urllib.urlopen(media['media_url_https']).read()
 
-                    now = str(int(round(time.time() * 1000)))
-                    filename_in = now + '.jpg'
-                    file_path_in = tempfile.gettempdir() + '/' + filename_in
+                        now = str(int(round(time.time() * 1000)))
+                        filename_in = now + '.jpg'
+                        file_path_in = tempfile.gettempdir() + '/' + filename_in
 
-                    with open(file_path_in, 'wb') as f:
-                        f.write(image_data)
+                        with open(file_path_in, 'wb') as f:
+                            f.write(image_data)
 
-                    with nostdout():
-                        minioClient.fput_object('colorization', filename_in, file_path_in)
+                        with nostdout():
+                            minioClient.fput_object('colorization', filename_in, file_path_in)
 
-                    headers = {'X-Callback-Url': 'http://gateway:8080/async-function/tweetpic'}
-                    json_data = {
-                        "image": filename_in,
-                        "status_id": tweet['id_str']
-                    }
-                    r = requests.post('http://gateway:8080/async-function/colorization', json=json_data, headers=headers)
-                    if (r.status_code == requests.codes.accepted):
-                        print("Colorization succeeded for -> " + media['media_url_https'])
+                        headers = {'X-Callback-Url': 'http://gateway:8080/async-function/tweetpic'}
+                        json_data = {
+                            "image": filename_in,
+                            "status_id": tweet['id_str']
+                        }
+                        r = requests.post('http://gateway:8080/async-function/colorization', json=json_data, headers=headers)
+                        if (r.status_code == requests.codes.accepted):
+                            print("Colorization succeeded for -> " + media['media_url_https'])
+                        else:
+                            print("Colorization failed for -> " + media['media_url_https'])
                     else:
-                        print("Colorization failed for -> " + media['media_url_https'])
-                else:
-                    print("Not a photo :(")
+                        print("Not a photo :(")
             else:
                 print('No media :(')
         else:
@@ -69,4 +70,4 @@ if __name__ == '__main__':
 
     print('Listening for tweets')
     #This line filter Twitter Streams to capture data by the keywords: 'python', 'javascript', 'ruby'
-    stream.filter(track=['#colouriseme', '#colorizeme', '#coloriseme'])
+    stream.filter(track=['@colorisebot'])
