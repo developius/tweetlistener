@@ -26,9 +26,9 @@ class TweetListener(StreamListener):
         tweet = json.loads(data)
         print('Got tweet from %s "%s" (%i followers)' % (tweet['user']['screen_name'], tweet['text'], tweet['user']['followers_count']))
         if not tweet['retweeted']:
-            if (tweet['entities'] and tweet['entities']['media']):
-                print('Got %i media items' % len(tweet['entities']['media']))
-                for media in tweet['entities']['media']:
+            if (tweet['extended_entities'] and tweet['extended_entities']['media']):
+                print('Got %i media items' % len(tweet['extended_entities']['media']))
+                for media in tweet['extended_entities']['media']:
                     if (media['type'] == 'photo'):
                         print("Ooooo a photo")
                         image_data = urllib.urlopen(media['media_url_https']).read()
