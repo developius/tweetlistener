@@ -36,6 +36,7 @@ class TweetListener(StreamListener):
 
                             now = str(int(round(time.time() * 1000)))
                             filename_in = now + '.jpg'
+                            filename_out = now + '_output.jpg'
                             file_path_in = tempfile.gettempdir() + '/' + filename_in
 
                             with open(file_path_in, 'wb') as f:
@@ -47,6 +48,7 @@ class TweetListener(StreamListener):
                             headers = {'X-Callback-Url': 'http://gateway:8080/async-function/tweetpic'}
                             json_data = {
                                 "image": filename_in,
+                                "output_filename": filename_out,
                                 "status_id": tweet['id_str']
                             }
                             r = requests.post('http://gateway:8080/async-function/colorization', json=json_data, headers=headers)
